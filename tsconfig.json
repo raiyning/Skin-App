@@ -6,7 +6,9 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "target": "es2022",        // Supports async/await
+    "module": "esnext",        // Allows top-level await
   },
   "include": [
     "**/*.ts",
