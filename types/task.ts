@@ -1,9 +1,10 @@
 export interface Task {
-    id: number;
-    title: string;
-    description: string;
-    emoji: string;
-    progress: string;
+    id: string;
+    task_uuid: string | null;
+    title: string | null;
+    description: string | null;
+    emoji: string | null;
+    progress: string | null;
   }
 
 export interface TaskStore {

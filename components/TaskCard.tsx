@@ -12,7 +12,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(`/task/${task.id}`); // Navigate to the task details page
+    router.push(`/task/${task.task_uuid}`); // Navigate to the task details page
   };
 
   return (
