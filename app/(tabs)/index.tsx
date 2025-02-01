@@ -1,44 +1,59 @@
-// index.tsx
-import React , { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity} from "react-native";
-import CircleButton from "@/components/CircleButton";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { Tasks } from "@/types/task"
-import TaskCard from "@/components/TaskCard"; // Import the TaskCard component
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-
+import TaskCard from "@/components/TaskCard";
+import CircleButton from "@/components/CircleButton";
+import { Tasks, Task } from "@/types/task"; // Example types
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSystem } from "@/lib/powersync/PowerSync";
+import { TASKS_TABLE } from "@/lib/powersync/AppSchema"
 
 const App = () => {
-
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
-  const tasks: Tasks = [
-    {
-      id: 1,
-      title: "Bedtime Oral Health",
-      description: "1. Floss 2. Brush teeth 3. Whitening product 4. Clean",
-      emoji: "🦷",
-      progress: "0/1",
-    },
-    {
-      id: 2,
-      title: "Gym",
-      description: "Look good",
-      emoji: "💪",
-      progress: "0/1",
-    }]
 
+  const [tasks, setTasks] = useState<Tasks>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+
+  const { supabaseConnector, powersync, db } = useSystem();
+  const onSignOut = async () => {
+    await powersync.disconnect();
+    await supabaseConnector.client.auth.signOut();
+  };
+
+  // 1. Fetch initial data
+const fetchTasks = async () => {
+  try {
+    setLoading(true);
     
-    
+    // Query tasks using Kysely
+    const data = await db
+      .selectFrom("tasks") // Adjust table name if needed
+      .selectAll()
+      .execute();
+    setTasks(data);
+  } catch (err) {
+    console.error("Error fetching tasks:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // 2. Set up realtime subscription
+  useEffect(() => {
+    fetchTasks(); // Fetch tasks on mount
+  }, []);
 
   const handleTaskPress = (taskId: number) => {
-    router.push(`/task/${taskId}`); // Navigate to the dynamic task details page
-  };
-  const onAddTask = () => {
-    router.push("/add-task"); // Navigate to Add Task screen
+    router.push(`/task/${taskId}`);
   };
 
-  const headerRight = () => (
+  const onAddTask = () => {
+    router.push("/add-task");
+  };
+
+  const HeaderRight = () => (
     <TouchableOpacity
       onPress={() => router.push("/modal-add-task")}
       style={{ marginRight: 10 }}
@@ -47,21 +62,34 @@ const App = () => {
     </TouchableOpacity>
   );
 
+  const HeaderLeft = () => (
+    <TouchableOpacity onPress={onSignOut}>
+    <Ionicons name="log-out-outline" size={24} color="white" />
+    </TouchableOpacity>
+  )
+
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{headerRight}}/>
+      <Stack.Screen   
+      options={{ 
+        headerRight: () => <HeaderRight />,
+        headerLeft: () => <HeaderLeft/>
+      }}  
+      />
+      {loading && <Text style={styles.loadingText}>Loading...</Text>}
+
       <ScrollView>
-        {tasks.length > 0 ? (
+        {!loading && tasks.length > 0 ? (
           tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-            />
+            <TouchableOpacity key={Number(task.id)} onPress={() => handleTaskPress(Number(task.id))}>
+              <TaskCard task={task} />
+            </TouchableOpacity>
           ))
-        ) : (
+        ) : !loading ? (
           <Text style={styles.emptyText}>No tasks available. Add a task!</Text>
-        )}
+        ) : null}
       </ScrollView>
+
       <View style={styles.optionsContainer}>
         <CircleButton onPress={onAddTask} />
       </View>
@@ -70,32 +98,29 @@ const App = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "black", padding: 16 },
-  taskCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#333",
-    borderRadius: 16,
-    marginVertical: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "black",
     padding: 16,
   },
-  emoji: { fontSize: 32, marginRight: 16 },
-  taskContent: { flex: 1 },
-  taskTitle: { fontSize: 16, fontWeight: "bold", color: "white" },
-  taskDescription: { fontSize: 14, color: "#aaa", marginTop: 4 },
-  progress: { fontSize: 14, color: "white" },
-  optionsContainer: {
-    position: "absolute",
-    bottom: 80,
-    left: 0,
-    right: 0,
-    alignItems: "center",
+  loadingText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    marginVertical: 20,
   },
   emptyText: {
     color: "white",
     fontSize: 16,
     textAlign: "center",
     marginTop: 20,
+  },
+  optionsContainer: {
+    position: "absolute",
+    bottom: 80,
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
 });
 

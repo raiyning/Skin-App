@@ -1,21 +1,45 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { useSystem } from "@/lib/powersync/PowerSync";
 
 const AddTaskScreen = () => {
+  const { db } = useSystem();
   const [title, setTitle] = useState(""); // State for title
+  const [id, setId] = useState(""); // State for title
   const [description, setDescription] = useState(""); // State for description
   const [emoji, setEmoji] = useState(""); // State for emoji
   const [progress, setProgress] = useState("0/1"); // Default progress state
   const router = useRouter();
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!title || !description || !emoji) {
       alert("Please fill out all fields!"); // Validation check
       return;
     }
-console.log("add task")
-    router.back(); // Navigate back to the main screen
+    try {
+      // Insert a new row in the "tasks" table
+      await db
+        .insertInto("tasks")
+        .values({
+          // Adjust the column names to match your actual DB schema
+          id,
+          title,
+          description,
+          emoji,
+          progress
+          // e.g., if you have user_id, created_at, etc. add them here
+        })
+        .execute();
+
+      // PowerSync automatically picks this up and syncs to Supabase in the background.
+      // Once done, navigate back or show a success message
+      router.back();
+
+    } catch (err) {
+      console.error("Error adding task:", err);
+      alert("There was an error adding the task.");
+    }
   };
 
   return (
@@ -26,6 +50,14 @@ console.log("add task")
         value={title}
         onChangeText={setTitle}
         placeholder="Enter task title"
+        placeholderTextColor="#fff"
+      />
+      <Text style={styles.label}>Task Id:</Text>
+      <TextInput
+        style={styles.input}
+        value={id}
+        onChangeText={setId}
+        placeholder="Enter id"
         placeholderTextColor="#fff"
       />
 
