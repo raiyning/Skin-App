@@ -59,13 +59,7 @@ const RootLayout = () => {
 return (
     <>
     <PowerSyncProvider>
-    {/* <Stack>
-        <Stack.Screen name ="(tabs)" options={{ headerShown: false}}/>
-        <Stack.Screen name ="modal-add-task" options={{ presentation: "modal"}}/>
-        <Stack.Screen name="+not-found" />
-    </Stack> */}
-    <InitialLayout></InitialLayout>
-    {/* <StatusBar style="auto" /> */}
+      <InitialLayout></InitialLayout>
     </PowerSyncProvider>
     </>
 )

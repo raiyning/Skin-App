@@ -7,7 +7,6 @@ import CircleButton from "@/components/CircleButton";
 import { Tasks, Task } from "@/types/task"; // Example types
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSystem } from "@/lib/powersync/PowerSync";
-import { TASKS_TABLE } from "@/lib/powersync/AppSchema"
 
 const App = () => {
   const router = useRouter();
@@ -18,7 +17,7 @@ const App = () => {
 
   const { supabaseConnector, powersync, db } = useSystem();
   const onSignOut = async () => {
-    await powersync.disconnect();
+    await powersync.disconnectAndClear();
     await supabaseConnector.client.auth.signOut();
   };
 

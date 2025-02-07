@@ -5,18 +5,28 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "com.supabase",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.raiyans.skins"
+      "bundleIdentifier": "com.raiyans.skins",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleTypeRole": "Editor",
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.130966279375-65bdmtoc7m7tihm5470rr9kjhnqlri8f"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icn.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.raiyans.skins"
     },
     "web": {
       "bundler": "metro",
@@ -34,10 +44,24 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.130966279375-65bdmtoc7m7tihm5470rr9kjhnqlri8f"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8caa5007-85ae-4e62-bbaf-cc70e22280b0"
+      }
     }
   }
 }
